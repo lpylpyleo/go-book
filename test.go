@@ -42,9 +42,15 @@ func main() {
 	// fmt.Println(isMatch("acdcb", "a*c?b"))
 	// fmt.Println(isMatch("c", "*?*"))
 	// fmt.Println(isMatch("bbbababbbbabbbbababbaaabbaababbbaabbbaaaabbbaaaabb", "*b********bb*b*bbbbb*ba"))
-	fmt.Println(isMatch("abbabaaabbabbaababbabbbbbabbbabbbabaaaaababababbbabababaabbababaabbbbbbaaaabababbbaabbbbaabbbbababababbaabbaababaabbbababababbbbaaabbbbbabaaaabbababbbbaababaabbababbbbbababbbabaaaaaaaabbbbbaabaaababaaaabb", "**aa*****ba*a*bb**aa*ab****a*aaaaaa***a*aaaa**bbabb*b*b**aaaaaaaaa*a********ba*bbb***a*ba*bb*bb**a*b*bb"))
+	// fmt.Println(isMatch("abbabaaabbabbaababbabbbbbabbbabbbabaaaaababababbbabababaabbababaabbbbbbaaaabababbbaabbbbaabbbbababababbaabbaababaabbbababababbbbaaabbbbbabaaaabbababbbbaababaabbababbbbbababbbabaaaaaaaabbbbbaabaaababaaaabb", "**aa*****ba*a*bb**aa*ab****a*aaaaaa***a*aaaa**bbabb*b*b**aaaaaaaaa*a********ba*bbb***a*ba*bb*bb**a*b*bb"))
 
 	// fmt.Println(isMatch("abcabczzzde", "*abc???de*"))
+	// fmt.Println(removeDupAsteria("*b********bb*b*bbbbb*ba"))
+
+	src := []int{36, 34, 345, 13, 35, 4, 54, 225, 34, 23, 6, 23}
+	// src := []int{1, 43, 64, 23, 23, 54, 2, 67, 4, 46, 33}
+	quickSort(src)
+	fmt.Println(src)
 }
 
 func permute(nums []int) [][]int {
@@ -254,9 +260,11 @@ const (
 	question = '?'
 )
 
+// TODO 优先使用星号之间最长的字符串匹配
 func isMatch(s string, p string) bool {
-	fmt.Printf("s: %s, p: %s\n", s, p)
+	// fmt.Printf("s: %s, p: %s\n", s, p)
 	// sb, pb := []byte(s), []byte(p)
+	p = removeDupAsteria(p)
 	ls, lp := len(s), len(p)
 	var curS, curP int // s,p当前扫描位置
 
@@ -269,6 +277,7 @@ func isMatch(s string, p string) bool {
 	}
 
 	if lna > ls {
+		// 正则中除去星号的字符串长度大于源字符串，肯定无法匹配
 		return false
 	}
 
@@ -342,16 +351,22 @@ func isMatch(s string, p string) bool {
 				return false
 			}
 
+			// p1 := sub(p, 1)
+			// p2 := sub(p, nextIndex+1)
+
 			for i := lsi - 1; i >= 0; i-- {
 				if ls-si[i] >= lna {
-					res := isMatch(s[si[i]+ln:], p[nextIndex+1:])
+					res := isMatch(s[si[i]+ln:], p[1:])
+					// res := isMatch(s[si[i]+ln:], p1)
 					if res {
 						return true
 					}
-					res = isMatch(s[si[i]+ln:], p[1:])
+					res = isMatch(s[si[i]+ln:], p[nextIndex+1:])
+					// res = isMatch(s[si[i]+ln:], p2)
 					if res {
 						return true
 					}
+
 				}
 
 			}
@@ -369,4 +384,36 @@ func isMatch(s string, p string) bool {
 		curP++
 		curS++
 	}
+}
+
+func removeDupAsteria(p string) string {
+	if len(p) == 0 {
+		return p
+	}
+	// fmt.Println(p)
+	result := []byte{p[0]}
+	for i := 1; i < len(p); i++ {
+		if p[i] != asteria || p[i-1] != asteria {
+			result = append(result, p[i])
+		}
+	}
+	return string(result)
+}
+
+func quickSort(src []int) {
+	ls := len(src)
+	if ls <= 1 {
+		return
+	}
+	pivotIndex := 0
+	pivot := src[pivotIndex]
+	for i := 1; i < ls; i++ {
+		if v := src[i]; v < pivot {
+			copy(src[1:i+1], src[:i])
+			src[0] = v
+			pivotIndex++
+		}
+	}
+	quickSort(src[:pivotIndex])
+	quickSort(src[pivotIndex+1:])
 }
